@@ -1,0 +1,1 @@
+for K in *.png; do convert $K -resize 66.67% ../drawable-mdpi/$K; done;for K in *.png; do convert $K -resize 50% ../drawable-ldpi/$K; done

@@ -35,6 +35,7 @@ if [ $# -eq 0 ]
     exit 0
 fi
 
+
 find $1 \( -iname "*.MOV" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.cr2" -o -iname "*.mp4" -o -iname "*.tif" \) | 
 	while read i; do		
 		f="${i##*/}"
@@ -50,14 +51,12 @@ find $1 \( -iname "*.MOV" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.cr2"
 		checksum=${checksumArray[0]}
 		
 		destinationFile=$2/$datePathName/$checksum"_"$f
-		if [ -f $destinationFile ] #verify checksum if duplicate exist, and handle
+		if [ -f $destinationFile ]; then
 			fileDiff=$(diff $destinationFile $i)
-			then
 			if [ "$fileDiff" != "" ]; then
   				echo File "$i" file exist, but content differ. Please verify!!
 			fi
-    	else #File does not exist, copy 
-    		#echo copying "$i" $destinationFile
+    	else
 			cp "$i" $destinationFile
 		fi
 	done

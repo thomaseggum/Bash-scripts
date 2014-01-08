@@ -40,9 +40,9 @@ find $1 \( -iname "*.MOV" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.cr2"
 	while read i; do		
 		f="${i##*/}"
 		imageFolderName=$2/NO_EXIF_FILES #defaults
-		response=$(exiftool -CreateDate "$i" >/dev/null) 
+		response=$(exiftool -CreateDate "$i") 
 		responseLength=$(echo ${#response})
-		
+		echo responseLength $responseLength
 		if [ $responseLength -gt 0 ]; then
 			t=${response##* : };
 			a=(`echo $t | sed -e 's/[:-]/ /g'`)

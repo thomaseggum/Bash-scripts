@@ -29,37 +29,37 @@
 #    exit 1
 #else
 
-if [ $# -eq 0 ]
-  then
-    echo "Usage ./copy_files.sh sourcefolder destinationfolder"
-    exit 0
-fi
+function is_integer() {
+    printf "%d" $1 > /dev/null 2>&1
+    return $?
+}
 
-
+#Create folder for images without EXIF
+mkdir -p $2/NO_EXIF_FILES
 find $1 \( -iname "*.MOV" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.cr2" -o -iname "*.mp4" -o -iname "*.tif" \) | 
 	while read i; do		
 		f="${i##*/}"
-
-		response=$(exiftool -CreateDate "$i") 
-		t=${response##* : };
-		a=(`echo $t | sed -e 's/[:-]/ /g'`)
+		imageFolderName=$2/NO_EXIF_FILES #defaults
+		response=$(exiftool -CreateDate "$i" >/dev/null) 
+		responseLength=$(echo ${#response})
 		
-		#Handle Year folder
-		yearFolderName=${a[0]}
-		mkdir -p $yearFolderName
-		#End handle folder
+		if [ $responseLength -gt 0 ]; then
+			t=${response##* : };
+			a=(`echo $t | sed -e 's/[:-]/ /g'`)
+			yearFolderName=${a[0]}		
+			mkdir -p $yearFolderName
 
-		#Handle date folder, format yyyy-mm-dd
-		datePathName=${a[0]}-${a[1]}-${a[2]}
-		imageFolderName="$2/$yearFolderName/$datePathName"
-		mkdir -p $imageFolderName
+			datePathName=${a[0]}-${a[1]}-${a[2]}
+			imageFolderName="$2/$yearFolderName/$datePathName"
+			mkdir -p $imageFolderName
+		fi
 
 		#Create destination file name
 		checksumString=$(cksum "$i")
 		checksumArray=($checksumString)
 		checksum=${checksumArray[0]}
 		destinationFile=$imageFolderName/$checksum"_"$f
-
+		
 		#Handle copy image
 		if [ -f $destinationFile ]; then
 			fileDiff=$(diff $destinationFile $i)

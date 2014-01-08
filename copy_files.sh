@@ -43,14 +43,24 @@ find $1 \( -iname "*.MOV" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.cr2"
 		response=$(exiftool -CreateDate "$i") 
 		t=${response##* : };
 		a=(`echo $t | sed -e 's/[:-]/ /g'`)
-		datePathName=${a[0]}-${a[1]}-${a[2]}
-		mkdir -p "$2/$datePathName"
+		
+		#Handle Year folder
+		yearFolderName=${a[0]}
+		mkdir -p $yearFolderName
+		#End handle folder
 
+		#Handle date folder, format yyyy-mm-dd
+		datePathName=${a[0]}-${a[1]}-${a[2]}
+		imageFolderName="$2/$yearFolderName/$datePathName"
+		mkdir -p $imageFolderName
+
+		#Create destination file name
 		checksumString=$(cksum "$i")
 		checksumArray=($checksumString)
 		checksum=${checksumArray[0]}
-		
-		destinationFile=$2/$datePathName/$checksum"_"$f
+		destinationFile=$imageFolderName/$checksum"_"$f
+
+		#Handle copy image
 		if [ -f $destinationFile ]; then
 			fileDiff=$(diff $destinationFile $i)
 			if [ "$fileDiff" != "" ]; then

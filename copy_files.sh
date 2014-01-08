@@ -24,22 +24,42 @@
 #(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 #SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Echo starting
-COUNTER=0
-find $1 \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.cr2" -o -iname "*.mp4" -o -iname "*.tif" \) | 
-	while read i; do
-		j=${i##*/}
-		f="$COUNTER"_"${i##*/}"
-		let COUNTER=COUNTER+1 
+#if [ $# -ne 2 ]; then
+#    echo Usage ./copy_files.sh sourceFolder destinationFolder
+#    exit 1
+#else
 
-		#Read date from file
+if [ $# -eq 0 ]
+  then
+    echo "Usage ./copy_files.sh sourcefolder destinationfolder"
+    exit 0
+fi
+
+find $1 \( -iname "*.MOV" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.cr2" -o -iname "*.mp4" -o -iname "*.tif" \) | 
+	while read i; do		
+		f="${i##*/}"
+
 		response=$(exiftool -CreateDate "$i") 
 		t=${response##* : };
 		a=(`echo $t | sed -e 's/[:-]/ /g'`)
 		datePathName=${a[0]}-${a[1]}-${a[2]}
 		mkdir -p "$2/$datePathName"
+
+		checksumString=$(cksum "$i")
+		checksumArray=($checksumString)
+		checksum=${checksumArray[0]}
 		
-		#echo copying "$i" "$2/$datePathName/$f"
-		cp "$i" "$2/$datePathName/$f"
+		destinationFile=$2/$datePathName/$checksum"_"$f
+		if [ -f $destinationFile ] #verify checksum if duplicate exist, and handle
+			fileDiff=$(diff $destinationFile $i)
+			then
+			if [ "$fileDiff" != "" ]; then
+  				echo File "$i" file exist, but content differ. Please verify!!
+			fi
+    	else #File does not exist, copy 
+    		echo copying "$i" $destinationFile
+			cp "$i" $destinationFile
+    		echo the file  "$destinationFile" does not exist
+		fi
 	done
 exit 0

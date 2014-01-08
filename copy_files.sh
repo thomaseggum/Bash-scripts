@@ -57,9 +57,8 @@ find $1 \( -iname "*.MOV" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.cr2"
   				echo File "$i" file exist, but content differ. Please verify!!
 			fi
     	else #File does not exist, copy 
-    		echo copying "$i" $destinationFile
+    		#echo copying "$i" $destinationFile
 			cp "$i" $destinationFile
-    		echo the file  "$destinationFile" does not exist
 		fi
 	done
 exit 0
